@@ -1,47 +1,70 @@
-# Password Manager
+# Password Manager: generator-only prototype
 
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Security Tool](https://img.shields.io/badge/security-tool-green.svg)]()
+A small Python CLI that generates random passwords using the standard library's
+`secrets` module. **This is not a password vault.** It cannot store, encrypt,
+retrieve, search, or sync passwords, and it has not received a security audit.
 
-A secure password manager CLI with encryption and password generator.
+> **Important correction:** the original prototype printed the same hard-coded
+> value for every `generate` command. Its `add` and `get` commands did not store
+> or retrieve anything. Earlier claims about encrypted storage, a master
+> password, categories, strength checking, and auto-lock were incorrect. If you
+> used that old generated value for an account, replace that account's password
+> using a trusted password manager. Do not rely on this project as a vault.
 
-## ✨ Features
+## Install from this repository
 
-- **Secure Storage** - Encryption at rest (AES/Fernet)
-- **Master Password** - Single master password to unlock
-- **Password Generator** - Generate strong random passwords
-- **Categories** - Organize by category
-- **Password Strength** - Check password strength
-- **Search** - Find passwords quickly
-- **Auto-lock** - Automatic locking after timeout
-- **Rich UI** - Beautiful colored terminal output
-
-## 📦 Installation
+Python 3.8 or later is required. Use an isolated virtual environment:
 
 ```bash
 git clone https://github.com/Master-626/password-manager.git
 cd password-manager
-pip install .
+python -m venv .venv
+# macOS / Linux:
+source .venv/bin/activate
+# Windows PowerShell instead:
+# .venv\Scripts\Activate.ps1
+python -m pip install .
 ```
 
-## 🚀 Quick Start
+These instructions install this repository. A similarly named package on a
+package index is not a verified distribution of this project.
+
+## Generate a password
 
 ```bash
-# Add a password
-passman add github -u Master-626
-
-# Get a password
-passman get github
-
-# Generate a strong password
-passman generate -l 20
+passman generate                  # 20 characters by default
+passman generate --length 32      # 8 to 1024 characters
+passman generate --no-symbols     # letters and digits only
+passman --help
 ```
 
-## 🔒 Security
+Each command prints one password followed by a newline, with no label or color
+formatting. Every result includes lowercase letters, uppercase letters, and
+digits; symbols are also included unless `--no-symbols` is selected. Generation
+uses the operating system's randomness through Python's `secrets.choice`, not a
+fixed example or the `random` module.
 
-All passwords are encrypted at rest using industry-standard cryptography. Your data never leaves your computer.
+Passwords are not written to a file or sent over the network by this program.
+They are visible in your terminal and can be captured by terminal logs, screen
+sharing, or a command that receives redirected output. Choose a length and
+character set accepted by the destination service, and store passwords in an
+established password manager.
 
-## 📄 License
+The old `add` and `get` commands now exit with an explicit error. `add` never
+prompts for a password. There is no master-password or encryption setup.
 
-MIT License
+## Development
+
+```bash
+python -m pip install -e .
+python -m unittest discover -s tests -v
+```
+
+Tests cover output length and character classes, use of `secrets`, input
+validation, CLI output, and rejection of the former storage placeholders.
+The implementation is small and uses only Click and the Python standard
+library. No cryptography implementation is included.
+
+## License
+
+[MIT License](LICENSE), retaining the original copyright notice.

@@ -1,35 +1,50 @@
-"""CLI interface."""
-import click
-from rich.console import Console
-from rich.table import Table
+"""Command-line interface for the generator-only prototype."""
 
-console = Console()
+import click
+
+from . import __version__
+from .generator import generate_password
+
 
 @click.group()
-@click.version_option(version="0.1.0")
+@click.version_option(version=__version__)
 def main():
-    """Password Manager - Securely manage your passwords."""
-    pass
+    """Generate random passwords. Password storage is not implemented."""
 
-@main.command()
+
+@main.command(hidden=True)
 @click.argument("service")
-@click.option("--username", "-u", help="Username")
-@click.password_option("--password", "-p", help="Password")
-def add(service, username, password):
-    """Add a new password entry."""
-    console.print(f"✅ Added password for: [bold green]{service}[/bold green]")
+@click.option("--username", "-u", help="Legacy option; storage is unavailable.")
+def add(service, username):
+    """Reject the old placeholder command without asking for a password."""
+    raise click.ClickException(
+        "Password storage is not implemented. Nothing was saved. "
+        "Use an established password manager to store credentials."
+    )
 
-@main.command()
+
+@main.command(hidden=True)
 @click.argument("service")
 def get(service):
-    """Get a password."""
-    console.print(f"🔑 Password for {service}: ********")
+    """Reject the old placeholder command rather than inventing a result."""
+    raise click.ClickException(
+        "Password storage is not implemented. No password can be retrieved."
+    )
+
 
 @main.command()
-@click.option("--length", "-l", default=16, help="Password length")
-def generate(length):
-    """Generate a strong password."""
-    console.print(f"🔐 Generated password: [bold green]xY7#kL2$mN9!pQ4@[/bold green] (length: {length})")
+@click.option(
+    "--length", "-l", default=20, show_default=True,
+    type=click.IntRange(8, 1024), help="Number of characters to generate.",
+)
+@click.option(
+    "--symbols/--no-symbols", default=True, show_default=True,
+    help="Include ASCII punctuation as well as letters and digits.",
+)
+def generate(length, symbols):
+    """Print one random password. The program does not save it."""
+    click.echo(generate_password(length=length, symbols=symbols))
+
 
 if __name__ == "__main__":
     main()

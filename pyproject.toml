@@ -1,16 +1,19 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "password-manager"
 version = "0.1.0"
-description = "A secure password manager CLI with encryption and password generator."
+description = "A generator-only CLI using Python secrets; password storage is not implemented."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
 authors = [{ name = "Xu Jiaqi", email = "jiaqixu12138@gmail.com" }]
-dependencies = ["click>=8.0.0", "rich>=13.0.0", "cryptography>=41.0.0"]
+dependencies = ["click>=8.0.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [project.scripts]
 passman = "password_manager.cli:main"
