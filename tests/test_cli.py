@@ -1,5 +1,7 @@
-from pathlib import Path
+import os
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from click.testing import CliRunner
@@ -25,7 +27,9 @@ class CliTests(unittest.TestCase):
         self.assertEqual(result.output, sample + "\n")
 
     def test_generate_options(self):
-        with patch("password_manager.cli.generate_password", return_value="sample") as generate:
+        with patch(
+            "password_manager.cli.generate_password", return_value="sample"
+        ) as generate:
             result = self.runner.invoke(main, ["generate", "-l", "32", "--no-symbols"])
         self.assertEqual(result.exit_code, 0, result.output)
         generate.assert_called_once_with(length=32, symbols=False)
@@ -37,10 +41,15 @@ class CliTests(unittest.TestCase):
                 self.assertEqual(result.exit_code, 2, result.output)
 
     def test_generate_creates_no_files(self):
-        with self.runner.isolated_filesystem():
-            result = self.runner.invoke(main, ["generate"])
-            self.assertEqual(result.exit_code, 0, result.output)
-            self.assertEqual(list(Path.cwd().iterdir()), [])
+        previous = Path.cwd()
+        with tempfile.TemporaryDirectory() as directory:
+            os.chdir(directory)
+            try:
+                result = self.runner.invoke(main, ["generate"])
+                self.assertEqual(result.exit_code, 0, result.output)
+                self.assertEqual(list(Path(directory).iterdir()), [])
+            finally:
+                os.chdir(previous)
 
     def test_add_fails_without_password_prompt(self):
         result = self.runner.invoke(main, ["add", "example", "-u", "someone"])
@@ -70,7 +79,7 @@ class CliTests(unittest.TestCase):
     def test_version(self):
         result = self.runner.invoke(main, ["--version"])
         self.assertEqual(result.exit_code, 0, result.output)
-        self.assertIn("0.1.0", result.output)
+        self.assertIn("0.1.1", result.output)
 
 
 if __name__ == "__main__":
